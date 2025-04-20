@@ -1,3 +1,4 @@
+// force rebuild: 20250421-v3
 useEffect(() => {
   const setup = JSON.parse(localStorage.getItem('infinity_setup')) || {};
   const user = localStorage.getItem('infinity_user') || 'คุณ';
