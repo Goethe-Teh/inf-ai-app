@@ -57,13 +57,15 @@ export default function ChatPage() {
     <div style={{ padding: 20 }}>
       <h2>Infinity Chat</h2>
       <div style={{ minHeight: '300px', border: '1px solid #ccc', padding: 10, marginBottom: 20 }}>
-        {messages.map((msg, index) => (
-          <p key={index}>
-            <b>{msg.role === 'user' ? callUser : aiCallSelf}:</b> {msg.content}
-          </p>
-        ))}
-        {thinking && <p><i>— กำลังพิมพ์...</i></p>}
-      </div>
+  {messages.map((msg, index) => {
+    return (
+      <p key={index}>
+        <b>{msg.role === 'user' ? callUser : aiCallSelf}:</b> {msg.content}
+      </p>
+    );
+  })}
+  {thinking && <p><i>— กำลังพิมพ์...</i></p>}
+</div>
       <input
         style={{ width: '80%', marginRight: 10 }}
         value={input}
