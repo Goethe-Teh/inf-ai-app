@@ -1,4 +1,4 @@
-// force rebuild: 20250421-v4
+/ force rebuild: 20250421-v4
 import { useEffect, useState } from 'react';
 
 export default function ChatPage() {
