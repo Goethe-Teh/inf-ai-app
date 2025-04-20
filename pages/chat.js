@@ -62,7 +62,7 @@ export default function ChatPage() {
       <div style={{ minHeight: '300px', border: '1px solid #ccc', padding: 10, marginBottom: 20 }}>
         {messages.map((msg, index) => (
           <p key={index}>
-            <b>{msg.role === 'user' ? ${callUser} : `${aiCallSelf}`}:</b> {msg.content}
+            <b>{msg.role === 'user' ? callUser : aiCallSelf}`}:</b> {msg.content}
           </p>
         ))}
         {thinking && <p><i>— กำลังพิมพ์...</i></p>}
