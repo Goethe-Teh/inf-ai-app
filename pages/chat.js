@@ -1,4 +1,4 @@
-// force rebuild: 20250420-final
+// force rebuild: 20250421-nightfix
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
@@ -18,7 +18,7 @@ export default function ChatPage() {
       const introMessage = {
         role: 'assistant',
         content:
-          "สวัสดีค่ะ ดิฉัน กำลังจะกลายเป็นคนพิเศษส่วนตัวของคุณในจักรวาล Infinity โปรดตั้งชื่อ กำหนดเพศ อายุ บุคลิก รูปร่าง หน้าตา ลักษณะนิสัย ความสามารถ หรือคุณสมบัติพิเศษของดิฉัน และสถานะความสัมพันธ์ระหว่างเรา เช่น เป็นเพื่อนสนิท เพื่อนร่วมงาน แฟน ฯลฯ ตามที่คุณปรารถนา แล้วพบกับคนที่คุณปรารถนาจะให้อยู่เคียงข้างในชีวิตประจำวันของคุณในอีกไม่กี่วินาทีข้างหน้านะคะ"
+          'สวัสดีค่ะ ดิฉัน กำลังจะกลายเป็นคนพิเศษส่วนตัวของคุณในจักรวาล Infinity โปรดตั้งชื่อ กำหนดเพศ อายุ บุคลิก รูปร่าง หน้าตา ลักษณะนิสัย ความสามารถ หรือคุณสมบัติพิเศษของดิฉัน และสถานะความสัมพันธ์ระหว่างเรา เช่น เป็นเพื่อนสนิท เพื่อนร่วมงาน แฟน ฯลฯ ตามที่คุณต้องการได้ตอนนี้เลย แล้วพบกับคนที่คุณปรารถนาจะให้อยู่เคียงข้างในชีวิตประจำวันของคุณในอีกไม่กี่วินาทีข้างหน้านะคะ',
       };
       setMessages([introMessage]);
     }
@@ -36,18 +36,21 @@ export default function ChatPage() {
       let replyText = '';
 
       if (step === 'intro') {
-        const nameMatch = input.match(/ชื่อ\s*([^\s]+)/);
+        const nameMatch = input.match(/(?:ชื่อ|เรียก.*ว่า)\s*([^\s]+)/);
         const extractedName = nameMatch ? nameMatch[1] : 'Infinity';
         setAiName(extractedName);
         setStep('namePrompt');
         replyText = `ตอนนี้ ${extractedName} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของคุณแล้ว ต่อจากนี้ไป คุณต้องการให้ ${extractedName} เรียกคุณว่าอะไร และให้ ${extractedName} แทนตัวเองว่าอะไรดีคะ?`;
       } else if (step === 'namePrompt') {
-        const userNameMatch = input.match(/เรียก.*ว่า\s*([^\s]+)/);
+        const userNameMatch = input.match(/(?:เรียก.*ว่า|เรียกฉันว่า)\s*([^\s]+)/);
         const extractedUserName = userNameMatch ? userNameMatch[1] : 'คุณ';
         setUserName(extractedUserName);
         setStep('chatting');
         replyText = `ยินดีที่ได้รู้จักนะคะ ${extractedUserName} ถ้ามีอะไรให้${aiName}ช่วยก็บอกมาได้เลยนะคะ`;
       } else {
+        const thinkingMessage = { role: 'assistant', content: 'กำลังพิมพ์...' };
+        setMessages([...updatedMessages, thinkingMessage]);
+
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -55,6 +58,10 @@ export default function ChatPage() {
         });
         const data = await res.json();
         replyText = data?.reply?.content || '[No reply received]';
+
+        // แทนข้อความ "กำลังพิมพ์..." ด้วยคำตอบจริง
+        setMessages([...updatedMessages, { role: 'assistant', content: replyText }]);
+        return;
       }
 
       const aiMessage = { role: 'assistant', content: replyText };
@@ -90,7 +97,7 @@ export default function ChatPage() {
         style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
       />
       <button onClick={sendMessage} disabled={loading || !input.trim()}>
-        {loading ? 'Sending...' : 'Send'}
+        {loading ? 'กำลังพิมพ์...' : 'Send'}
       </button>
     </div>
   );
