@@ -1,3 +1,4 @@
+// force rebuild: 20250420-final
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
@@ -65,8 +66,8 @@ export default function ChatPage() {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !loading) {
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !loading && input.trim()) {
       sendMessage();
     }
   };
@@ -77,14 +78,14 @@ export default function ChatPage() {
       <div style={{ minHeight: '200px', marginBottom: '20px' }}>
         {messages.map((msg, index) => (
           <p key={index}>
-            <b>{msg.role === 'user' ? userName || 'User' : aiName}:</b> {msg.content}
+            <b>{msg.role === 'user' ? (userName || 'User') : aiName}:</b> {msg.content}
           </p>
         ))}
       </div>
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
+        onKeyDown={handleKeyPress}
         placeholder="Type your message here..."
         style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
       />
