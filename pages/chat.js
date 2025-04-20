@@ -1,40 +1,36 @@
 // force rebuild: 20250421-v3
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);
-  const [aiCallSelf, setAiCallSelf] = useState('Infinity AI');
-  const [callUser, setCallUser] = useState('คุณ');
+
+  // โหลดข้อมูลจาก localStorage
+  const setup = JSON.parse(localStorage.getItem('infinity_setup')) || {};
+  const user = localStorage.getItem('infinity_user') || 'คุณ';
+  const aiName = setup.name || 'Infinity AI';
+  const aiCallSelf = setup.aiCallSelf || aiName;
+  const callUser = setup.callUser || user;
+  const gender = setup.gender || 'custom'; // male, female, custom
+
+  // ตั้งคำพูดตามเพศ
+  const greeting = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
+  const referSelf = gender === 'male' ? 'ผม' : gender === 'female' ? 'ดิฉัน' : aiCallSelf;
+  const politeEnd = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
 
   useEffect(() => {
-    const setup = JSON.parse(localStorage.getItem('infinity_setup')) || {};
-    const user = localStorage.getItem('infinity_user') || 'คุณ';
-
-    const aiName = setup.name || 'Infinity AI';
-    const aiCall = setup.aiCallSelf || aiName;
-    const userCall = setup.callUser || user;
-    const gender = setup.gender || 'custom'; // male, female, custom
-
-    setAiCallSelf(aiCall);
-    setCallUser(userCall);
-
-    const greeting = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
-    const referSelf = gender === 'male' ? 'ผม' : gender === 'female' ? 'ดิฉัน' : aiCall;
-
     const welcome = {
       role: 'assistant',
-      content: `${aiCall}: สวัสดี${greeting} ${userCall} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของคุณแล้ว`,
+      content: `${aiCallSelf}: สวัสดี${greeting} ${callUser} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของคุณแล้วนะ${politeEnd}`,
     };
-
     setMessages([welcome]);
   }, []);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
-    setThinking(true);
 
+    setThinking(true);
     const userMessage = { role: 'user', content: input };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
@@ -47,10 +43,11 @@ export default function ChatPage() {
         body: JSON.stringify({ messages: updatedMessages }),
       });
       const data = await res.json();
-      const reply = data.reply;
-      setMessages([...updatedMessages, reply]);
+      if (data.reply) {
+        setMessages([...updatedMessages, data.reply]);
+      }
     } catch (err) {
-      setMessages([...updatedMessages, { role: 'assistant', content: 'ขอโทษค่ะ เกิดข้อผิดพลาดในการเชื่อมต่อ...' }]);
+      setMessages([...updatedMessages, { role: 'assistant', content: 'เกิดข้อผิดพลาดในการตอบค่ะ' }]);
     } finally {
       setThinking(false);
     }
