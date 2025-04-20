@@ -1,44 +1,89 @@
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-export default function Chat() {
+export default function ChatPage() {
   const router = useRouter();
   const { language } = router.query;
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState('intro');
+  const [userName, setUserName] = useState('');
+  const [aiName, setAiName] = useState('Infinity');
+
+  useEffect(() => {
+    if (language) {
+      const introMessage = {
+        role: 'assistant',
+        content:
+          "Infinity: สวัสดีค่ะ ดิฉัน กำลังจะกลายเป็นคนพิเศษส่วนตัวของคุณในจักรวาล Infinity โปรดตั้งชื่อ กำหนดเพศ อายุ บุคลิก รูปร่าง หน้าตา ลักษณะนิสัย ความสามารถ หรือคุณสมบัติพิเศษของดิฉัน และสถานะความสัมพันธ์ระหว่างเรา เช่น เป็นเพื่อนสนิท เพื่อนร่วมงาน แฟน ฯลฯ ตามที่คุณปรารถนา แล้วพบกับคนที่คุณปรารถนาจะให้อยู่เคียงข้างในชีวิตประจำวันของคุณในอีกไม่กี่วินาทีข้างหน้านะคะ"
+      };
+      setMessages([introMessage]);
+    }
+  }, [language]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+    setLoading(true);
     const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInput('');
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: [...messages, userMessage], language }),
-    });
-    const data = await res.json();
-    if (data.result) {
-      setMessages(prev => [...prev, { role: 'assistant', content: data.result }]);
+
+    try {
+      let replyText = '';
+
+      if (step === 'intro') {
+        const nameMatch = input.match(/ชื่อ\s*([^\s]+)/);
+        const extractedName = nameMatch ? nameMatch[1] : 'Infinity';
+        setAiName(extractedName);
+        setStep('namePrompt');
+        replyText = `Infinity: ตอนนี้ ${extractedName} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของคุณแล้ว ต่อจากนี้ไป คุณต้องการให้ ${extractedName} เรียกคุณว่าอะไร และให้ ${extractedName} แทนตัวเองว่าอะไรดีคะ?`;
+      } else if (step === 'namePrompt') {
+        const userNameMatch = input.match(/เรียก.*ว่า\s*([^\s]+)/);
+        const extractedUserName = userNameMatch ? userNameMatch[1] : 'คุณ';
+        setUserName(extractedUserName);
+        setStep('chatting');
+        replyText = `${aiName}: ยินดีที่ได้รู้จักนะคะ ${extractedUserName} ถ้ามีอะไรให้${aiName}ช่วยก็บอกมาได้เลยนะคะ`;
+      } else {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: updatedMessages }),
+        });
+        const data = await res.json();
+        replyText = data?.reply?.content || '[No reply received]';
+      }
+
+      const aiMessage = { role: 'assistant', content: replyText };
+      setMessages([...updatedMessages, aiMessage]);
+    } catch (err) {
+      setMessages([...updatedMessages, { role: 'assistant', content: '[Error communicating with server]' }]);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: 30 }}>
-      <h2>Chatting in: {language || 'Unknown Language'}</h2>
-      <div style={{ minHeight: 200, marginBottom: 20 }}>
-        {messages.map((msg, i) => (
-          <p key={i}><strong>{msg.role}:</strong> {msg.content}</p>
+    <div style={{ padding: 20 }}>
+      <h2>AI Chat</h2>
+      <div style={{ minHeight: '200px', marginBottom: '20px' }}>
+        {messages.map((msg, index) => (
+          <p key={index}>
+            <b>{msg.role === 'user' ? 'User' : aiName}:</b> {msg.content}
+          </p>
         ))}
       </div>
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-        placeholder="Type your message..."
-        style={{ width: '80%' }}
+        placeholder="Type your message here..."
+        style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
       />
-      <button onClick={sendMessage}>Send</button>
+      <button onClick={sendMessage} disabled={loading || !input.trim()}>
+        {loading ? 'Sending...' : 'Send'}
+      </button>
     </div>
   );
 }
