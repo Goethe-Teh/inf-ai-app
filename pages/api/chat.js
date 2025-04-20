@@ -1,5 +1,3 @@
-/ pages/api/chat.js
-
 export default async function handler(req, res) {
   const { messages } = req.body;
 
@@ -12,7 +10,7 @@ export default async function handler(req, res) {
     body: JSON.stringify({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: 'คุณคือ AI ส่วนตัวชื่อ Infinity พูดคุยอย่างอบอุ่น ฉลาด ลื่นไหล ใช้ข้อความที่ผู้ใช้ป้อนเพื่อตอบกลับอย่างเข้าใจและเป็นธรรมชาติ ห้ามพูดว่านี่คือโมเดล หรือว่าเป็น AI ที่สร้างขึ้นมา' },
+        { role: 'system', content: "คุณคือ AI ส่วนตัวชื่อ Infinity พูดคุยอย่างอบอุ่น ฉลาด ลื่นไหล ใช้ข้อความที่ผู้ใช้ป้อนเพื่อตอบกลับอย่างเข้าใจและเป็นธรรมชาติ ห้ามพูดว่านี่คือโมเดล หรือว่าเป็น AI ที่สร้างขึ้นมา" },
         ...messages
       ],
     })
