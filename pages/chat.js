@@ -1,4 +1,4 @@
-// force rebuild: 20250421-nightfix
+// force rebuild: 20250421-v1
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
@@ -12,6 +12,7 @@ export default function ChatPage() {
   const [step, setStep] = useState('intro');
   const [userName, setUserName] = useState('');
   const [aiName, setAiName] = useState('Infinity');
+  const [status, setStatus] = useState('');
 
   useEffect(() => {
     if (language) {
@@ -26,7 +27,9 @@ export default function ChatPage() {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+    setStatus('กำลังคิด...');
     setLoading(true);
+
     const userMessage = { role: 'user', content: input };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
@@ -48,9 +51,7 @@ export default function ChatPage() {
         setStep('chatting');
         replyText = `ยินดีที่ได้รู้จักนะคะ ${extractedUserName} ถ้ามีอะไรให้${aiName}ช่วยก็บอกมาได้เลยนะคะ`;
       } else {
-        const thinkingMessage = { role: 'assistant', content: 'กำลังพิมพ์...' };
-        setMessages([...updatedMessages, thinkingMessage]);
-
+        setStatus('กำลังดำเนินการ...');
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -58,16 +59,14 @@ export default function ChatPage() {
         });
         const data = await res.json();
         replyText = data?.reply?.content || '[No reply received]';
-
-        // แทนข้อความ "กำลังพิมพ์..." ด้วยคำตอบจริง
-        setMessages([...updatedMessages, { role: 'assistant', content: replyText }]);
-        return;
       }
 
       const aiMessage = { role: 'assistant', content: replyText };
       setMessages([...updatedMessages, aiMessage]);
+      setStatus('');
     } catch (err) {
       setMessages([...updatedMessages, { role: 'assistant', content: '[Error communicating with server]' }]);
+      setStatus('');
     } finally {
       setLoading(false);
     }
@@ -82,22 +81,26 @@ export default function ChatPage() {
   return (
     <div style={{ padding: 20 }}>
       <h2>Infinity Chat</h2>
-      <div style={{ minHeight: '200px', marginBottom: '20px' }}>
+      <div style={{ minHeight: '200px', marginBottom: '10px' }}>
         {messages.map((msg, index) => (
           <p key={index}>
             <b>{msg.role === 'user' ? (userName || 'User') : aiName}:</b> {msg.content}
           </p>
         ))}
+        {status && <p style={{ fontStyle: 'italic', color: 'gray' }}>— {status}</p>}
       </div>
       <input
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={(e) => {
+          setInput(e.target.value);
+          setStatus('กำลังรอฟัง...');
+        }}
         onKeyDown={handleKeyPress}
         placeholder="Type your message here..."
         style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
       />
       <button onClick={sendMessage} disabled={loading || !input.trim()}>
-        {loading ? 'กำลังพิมพ์...' : 'Send'}
+        {loading ? 'Sending...' : 'Send'}
       </button>
     </div>
   );
