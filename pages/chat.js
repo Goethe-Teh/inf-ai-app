@@ -1,85 +1,64 @@
-// force rebuild: 20250421-v4
-import { useState, useEffect } from 'react';
+// force rebuild: 20250421-language-v2
+import React, { useState } from 'react';
+import { useRouter } from 'next/router';
 
-export default function ChatPage() {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [thinking, setThinking] = useState(false);
-  const [callUser, setCallUser] = useState('คุณ');
-  const [aiCallSelf, setAiCallSelf] = useState('Infinity AI');
+export default function LanguagePage() {
+  const router = useRouter();
+  const [language, setLanguage] = useState('');
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const setup = JSON.parse(localStorage.getItem('infinity_setup')) || {};
-      const user = localStorage.getItem('infinity_user') || 'คุณ';
-
-      const aiName = setup.name || 'Infinity AI';
-      const aiCall = setup.aiCallSelf || aiName;
-      const userCall = setup.callUser || user;
-      const gender = setup.gender || 'custom';
-
-      const greeting = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
-      const referSelf = gender === 'male' ? 'ผม' : gender === 'female' ? 'ดิฉัน' : aiCall;
-      const politeEnd = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
-
-      setAiCallSelf(aiCall);
-      setCallUser(userCall);
-
-      const welcome = {
-        role: 'assistant',
-        content: `${aiCall}: สวัสดี${greeting} ${userCall} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของคุณแล้วนะ${politeEnd}`,
-      };
-      setMessages([welcome]);
+  const handleStart = () => {
+    if (!language) {
+      alert('Please select a language');
+      return;
     }
-  }, []);
-
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-
-    setThinking(true);
-    const userMessage = { role: 'user', content: input };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setInput('');
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: updatedMessages }),
-      });
-      const data = await res.json();
-      if (data.reply) {
-        setMessages([...updatedMessages, data.reply]);
-      }
-    } catch (err) {
-      setMessages([...updatedMessages, {
-        role: 'assistant',
-        content: 'เกิดข้อผิดพลาดในการตอบค่ะ'
-      }]);
-    } finally {
-      setThinking(false);
-    }
+    localStorage.setItem('infinity_language', language);
+    router.push('/setup');
   };
 
+  const languages = [
+    { code: 'ar', label: 'العربية (Arabic)' },
+    { code: 'zh', label: '中文 (Chinese)' },
+    { code: 'en', label: 'English' },
+    { code: 'tl', label: 'Filipino (Tagalog)' },
+    { code: 'fr', label: 'Français (French)' },
+    { code: 'de', label: 'Deutsch (German)' },
+    { code: 'hi', label: 'हिंदी (Hindi)' },
+    { code: 'id', label: 'Bahasa Indonesia' },
+    { code: 'it', label: 'Italiano (Italian)' },
+    { code: 'ja', label: '日本語 (Japanese)' },
+    { code: 'ko', label: '한국어 (Korean)' },
+    { code: 'ms', label: 'Bahasa Melayu' },
+    { code: 'pt', label: 'Português (Portuguese)' },
+    { code: 'ru', label: 'Русский (Russian)' },
+    { code: 'th', label: 'ไทย (Thai)' },
+    { code: 'vi', label: 'Tiếng Việt (Vietnamese)' },
+    { code: 'es', label: 'Español (Spanish)' }
+  ];
+
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Infinity Chat</h2>
-      <div style={{ minHeight: '300px', border: '1px solid #ccc', padding: 10, marginBottom: 20 }}>
-        {messages.map((msg, index) => (
-          <p key={index}>
-            <b>{msg.role === 'user' ? callUser : aiCallSelf}:</b> {msg.content}
-          </p>
+    <div style={{ padding: 30, maxWidth: 500, margin: 'auto' }}>
+      <h2>Hello, welcome to Infinity AI</h2>
+      <p>Please choose your language:</p>
+      <select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        style={{ width: '100%', padding: 10, marginTop: 10 }}
+      >
+        <option value="">-- Select Language --</option>
+        {languages
+          .sort((a, b) => a.label.localeCompare(b.label))
+          .map((lang) => (
+            <option key={lang.code} value={lang.code}>
+              {lang.label}
+            </option>
         ))}
-        {thinking && <p><i>— กำลังพิมพ์...</i></p>}
-      </div>
-      <input
-        style={{ width: '80%', marginRight: 10 }}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-      />
-      <button onClick={sendMessage}>Send</button>
+      </select>
+      <button
+        onClick={handleStart}
+        style={{ width: '100%', padding: 10, marginTop: 20 }}
+      >
+        Enter
+      </button>
     </div>
   );
 }
