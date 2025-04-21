@@ -92,7 +92,7 @@ export default function SetupPage() {
       <p>10. ให้เรียกคุณว่าอะไร (ตัวอย่าง: พี่พลอย, นายท่าน)</p>
       <input name="callUser" value={form.callUser} onChange={handleChange} style={{ width: '100%', marginBottom: 10 }} />
 
-      <p>11. ให้ AI แทนตัวเองว่าอะไร (ตัวอย่าง: ลิซ่า, ผม, ดิฉัน)</p>
+      <p>11. ให้ Infinity AI แทนตัวเองว่าอะไร (ตัวอย่าง: ลิซ่า, ผม, ดิฉัน)</p>
       <input name="aiCallSelf" value={form.aiCallSelf} onChange={handleChange} style={{ width: '100%', marginBottom: 10 }} />
 
       <p>12. หมายเหตุเพิ่มเติม (ถ้ามี)</p>
