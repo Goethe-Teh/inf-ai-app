@@ -1,36 +1,38 @@
-// force rebuild: 20250421-chat-v4
+// force rebuild: 20250421-chat-v5
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [aiCallSelf, setAiCallSelf] = useState('Infinity AI');
+  const [callUser, setCallUser] = useState('คุณ');
+
+  const router = useRouter();
 
   // โหลดข้อมูลจาก localStorage
   useEffect(() => {
     const setup = JSON.parse(localStorage.getItem('infinity_setup')) || {};
     const user = localStorage.getItem('infinity_user') || 'คุณ';
     const aiName = setup.name || 'Infinity AI';
-    const aiCallSelf = setup.aiCallSelf || aiName;
-    const callUser = setup.callUser || user;
+    const aiCall = setup.aiCallSelf || aiName;
+    const userCall = setup.callUser || user;
     const gender = setup.gender || 'custom';
 
     const greeting = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
-    const referSelf = gender === 'male' ? 'ผม' : gender === 'female' ? 'ดิฉัน' : aiCallSelf;
+    const referSelf = gender === 'male' ? 'ผม' : gender === 'female' ? 'ดิฉัน' : aiCall;
     const politeEnd = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
 
-    setAiCallSelf(aiCallSelf);
-    setCallUser(callUser);
+    setAiCallSelf(aiCall);
+    setCallUser(userCall);
 
     const welcome = {
       role: 'assistant',
-      content: `${aiCallSelf}: สวัสดี${greeting} ${callUser} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของคุณแล้วนะ${politeEnd}`,
+      content: `${aiCall}: สวัสดี${greeting} ${userCall} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของคุณแล้วนะ${politeEnd}`,
     };
     setMessages([welcome]);
   }, []);
-
-  const [aiCallSelf, setAiCallSelf] = useState('Infinity AI');
-  const [callUser, setCallUser] = useState('คุณ');
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -50,12 +52,11 @@ export default function ChatPage() {
       const data = await res.json();
       if (data.reply) {
         setMessages([...updatedMessages, data.reply]);
+      } else {
+        setMessages([...updatedMessages, { role: 'assistant', content: 'ขออภัยค่ะ ลิซ่าตอบไม่ได้ในตอนนี้' }]);
       }
     } catch (err) {
-      setMessages([
-        ...updatedMessages,
-        { role: 'assistant', content: 'เกิดข้อผิดพลาดในการตอบค่ะ' },
-      ]);
+      setMessages([...updatedMessages, { role: 'assistant', content: 'เกิดข้อผิดพลาดในการตอบค่ะ' }]);
     } finally {
       setSending(false);
     }
@@ -79,6 +80,10 @@ export default function ChatPage() {
         onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
       />
       <button onClick={sendMessage}>Send</button>
+
+      <div style={{ marginTop: 20 }}>
+        <button onClick={() => router.push('/settings')}>Settings</button>
+      </div>
     </div>
   );
 }
