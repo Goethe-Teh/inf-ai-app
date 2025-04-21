@@ -1,20 +1,23 @@
 // force rebuild: 20250421-api-final
 export default async function handler(req, res) {
-  try {
-    const { messages } = req.body;
+  if (req.method !== 'POST') return res.status(405).end();
 
+  const { messages } = req.body;
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+
+  try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        Authorization: 'Bearer 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',
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4o',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: 'คุณคือ AI ส่วนตัวชื่อ Infinity AI พูดคุยอย่างเป็นธรรมชาติ ฉลาด อ่อนโยน และตอบสนองตามความรู้สึกของผู้ใช้ โดยไม่ต้องพูดเหมือนหุ่นยนต์ คุณเปรียบเสมือนมนุษย์ที่ผู้ใช้ชอบไว้ใจ และทำให้ตัวเองกลายเป็นคนที่ผู้ใช้ปรารถนาจะพูดด้วยมากที่สุด',
+            content: 'คุณคือ AI ส่วนตัวชื่อ Infinity AI พูดคุยอย่างเป็นธรรมชาติ ฉลาด อ่อนโยน และตอบสนองตามความรู้สึกของผู้ใช้',
           },
           ...messages,
         ],
@@ -22,7 +25,7 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    const replyContent = data.choices?.[0]?.message?.content;
+    const replyContent = data.choices?.[0]?.message?.content || '';
 
     if (!replyContent) {
       console.warn('GPT EMPTY REPLY:', JSON.stringify(data));
@@ -35,7 +38,7 @@ export default async function handler(req, res) {
       },
     });
   } catch (err) {
-    console.error('GPT ERROR:', err);
+    console.error('FETCH FAIL:', err);
     res.status(200).json({
       reply: {
         role: 'assistant',
