@@ -27,9 +27,9 @@ export default function ChatPage() {
     setAiCallSelf(aiCall);
     setCallUser(userCall);
 
-    const welcome = {
+   const welcome = {
   role: 'assistant',
-  content: `สวัสดี${greeting} ${userCall} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของ${userCall} แล้วนะ${politeEnd}`,
+  content: สวัสดี${greeting} ${userCall} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของ${userCall} แล้วนะ${politeEnd}
 };
 
   const sendMessage = async () => {
