@@ -1,3 +1,5 @@
+// force rebuild: 20250421-language-v1
+import React from 'react';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
