@@ -11,7 +11,6 @@ export default function ChatPage() {
 
   const router = useRouter();
 
-  // โหลดข้อมูลจาก localStorage
   useEffect(() => {
     const setup = JSON.parse(localStorage.getItem('infinity_setup')) || {};
     const user = localStorage.getItem('infinity_user') || 'คุณ';
@@ -27,10 +26,12 @@ export default function ChatPage() {
     setAiCallSelf(aiCall);
     setCallUser(userCall);
 
-   const welcome = {
-  role: 'assistant',
-  content: 'สวัสดี${greeting} ${userCall} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของ${userCall} แล้วนะ${politeEnd}'
-};
+    const welcome = {
+      role: 'assistant',
+      content: `สวัสดี${greeting} ${userCall} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของ${userCall} แล้วนะ${politeEnd}`
+    };
+    setMessages([welcome]);
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
