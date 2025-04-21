@@ -1,25 +1,27 @@
-// force rebuild: 20250421-chat-v3
+// force rebuild: 20250421-chat-v4
 import { useState, useEffect } from 'react';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [thinking, setThinking] = useState(false);
+  const [sending, setSending] = useState(false);
 
-  // โหลดข้อมูลจาก setup ที่กรอกไว้ก่อนหน้า
-  const setup = JSON.parse(localStorage.getItem('infinity_setup')) || {};
-  const user = localStorage.getItem('infinity_user') || 'คุณ';
-  const aiName = setup.name || 'Infinity AI';
-  const aiCallSelf = setup.aiCallSelf || aiName;
-  const callUser = setup.callUser || user;
-  const gender = setup.gender || 'custom'; // male / female / custom
-
-  // ตั้งคำพูดตามเพศ
-  const greeting = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
-  const referSelf = gender === 'male' ? 'ผม' : gender === 'female' ? 'ดิฉัน' : aiCallSelf;
-  const politeEnd = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
-
+  // โหลดข้อมูลจาก localStorage
   useEffect(() => {
+    const setup = JSON.parse(localStorage.getItem('infinity_setup')) || {};
+    const user = localStorage.getItem('infinity_user') || 'คุณ';
+    const aiName = setup.name || 'Infinity AI';
+    const aiCallSelf = setup.aiCallSelf || aiName;
+    const callUser = setup.callUser || user;
+    const gender = setup.gender || 'custom';
+
+    const greeting = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
+    const referSelf = gender === 'male' ? 'ผม' : gender === 'female' ? 'ดิฉัน' : aiCallSelf;
+    const politeEnd = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
+
+    setAiCallSelf(aiCallSelf);
+    setCallUser(callUser);
+
     const welcome = {
       role: 'assistant',
       content: `${aiCallSelf}: สวัสดี${greeting} ${callUser} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของคุณแล้วนะ${politeEnd}`,
@@ -27,10 +29,13 @@ export default function ChatPage() {
     setMessages([welcome]);
   }, []);
 
+  const [aiCallSelf, setAiCallSelf] = useState('Infinity AI');
+  const [callUser, setCallUser] = useState('คุณ');
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    setThinking(true);
+    setSending(true);
     const userMessage = { role: 'user', content: input };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
@@ -52,7 +57,7 @@ export default function ChatPage() {
         { role: 'assistant', content: 'เกิดข้อผิดพลาดในการตอบค่ะ' },
       ]);
     } finally {
-      setThinking(false);
+      setSending(false);
     }
   };
 
