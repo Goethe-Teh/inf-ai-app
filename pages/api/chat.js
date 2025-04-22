@@ -3,11 +3,13 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { messages } = req.body;
-  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+  console.log('✅ API KEY:', OPENROUTER_API_KEY);
+  console.log('✅ ส่งข้อความไป:', JSON.stringify(messages, null, 2));
 
   if (!OPENROUTER_API_KEY) {
-    return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY' });
-  }
+  console.error('❌ ไม่พบ OPENROUTER_API_KEY ในระบบ');
+  return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY' });
+}
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
