@@ -1,5 +1,5 @@
 // force rebuild: 20250421-language-v2
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 export default function LanguagePage() {
