@@ -1,15 +1,17 @@
-// force rebuild: 20250421-api-final
+// force rebuild: 20250422-api-public-key
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { messages } = req.body;
+  const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+
   console.log('✅ API KEY:', OPENROUTER_API_KEY);
   console.log('✅ ส่งข้อความไป:', JSON.stringify(messages, null, 2));
 
   if (!OPENROUTER_API_KEY) {
-  console.error('❌ ไม่พบ OPENROUTER_API_KEY ในระบบ');
-  return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY' });
-}
+    console.error('❌ ไม่พบ NEXT_PUBLIC_OPENROUTER_API_KEY ในระบบ');
+    return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY' });
+  }
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -38,7 +40,7 @@ export default async function handler(req, res) {
     const replyContent = data.choices?.[0]?.message?.content || '';
 
     if (!replyContent) {
-      console.warn('GPT EMPTY REPLY:', JSON.stringify(data));
+      console.warn('⚠️ GPT EMPTY REPLY:', JSON.stringify(data));
     }
 
     res.status(200).json({
@@ -48,7 +50,7 @@ export default async function handler(req, res) {
       },
     });
   } catch (err) {
-    console.error('FETCH FAIL:', err);
+    console.error('❌ FETCH FAIL:', err);
     res.status(200).json({
       reply: {
         role: 'assistant',
