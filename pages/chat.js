@@ -1,4 +1,4 @@
-// force rebuild: 20250421-chat-v5
+// force rebuild: 20250421-chat-v6
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
@@ -11,13 +11,20 @@ export default function ChatPage() {
 
   const router = useRouter();
 
+  // เช็กว่าเคยกรอก setup แล้วหรือยัง
   useEffect(() => {
-    const setup = JSON.parse(localStorage.getItem('infinity_setup')) || {};
+    const setup = localStorage.getItem('infinity_setup');
+    if (!setup) {
+      router.push('/setup');
+      return;
+    }
+
+    const setupData = JSON.parse(setup);
     const user = localStorage.getItem('infinity_user') || 'คุณ';
-    const aiName = setup.name || 'Infinity AI';
-    const aiCall = setup.aiCallSelf || aiName;
-    const userCall = setup.callUser || user;
-    const gender = setup.gender || 'custom';
+    const aiName = setupData.name || 'Infinity AI';
+    const aiCall = setupData.aiCallSelf || aiName;
+    const userCall = setupData.callUser || user;
+    const gender = setupData.gender || 'custom';
 
     const greeting = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
     const referSelf = aiCall;
@@ -28,7 +35,7 @@ export default function ChatPage() {
 
     const welcome = {
       role: 'assistant',
-      content: `สวัสดี${greeting} ${userCall} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของ${userCall} แล้วนะ${politeEnd}`
+      content: สวัสดี${greeting} ${userCall} ตอนนี้ ${referSelf} ได้ถูกสร้างขึ้นเพื่อเป็นคนพิเศษของ${userCall} แล้วนะ${politeEnd}
     };
     setMessages([welcome]);
   }, []);
@@ -52,7 +59,7 @@ export default function ChatPage() {
       if (data.reply) {
         setMessages([...updatedMessages, data.reply]);
       } else {
-        setMessages([...updatedMessages, { role: 'assistant', content: 'ขออภัยค่ะ ลิซ่าตอบไม่ได้ในตอนนี้' }]);
+        setMessages([...updatedMessages, { role: 'assistant', content: 'ขออภัยค่ะ Infinity AI ตอบไม่ได้ในตอนนี้' }]);
       }
     } catch (err) {
       setMessages([...updatedMessages, { role: 'assistant', content: 'เกิดข้อผิดพลาดในการตอบค่ะ' }]);
