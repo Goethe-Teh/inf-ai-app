@@ -13,7 +13,6 @@ export default function SetupPage() {
     ethnicity: '',
     appearance: '',
     heightWeight: '',
-    trait: '',
     expertise: '',
     relationship: '',
     callUser: '',
