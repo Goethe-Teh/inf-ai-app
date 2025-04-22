@@ -20,7 +20,7 @@ export default function ChatPage() {
     const gender = setup.gender || 'custom';
 
     const greeting = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
-    const referSelf = gender === 'male' ? 'ผม' : gender === 'female' ? 'ดิฉัน' : aiCall;
+    const referSelf = aiCall;
     const politeEnd = gender === 'male' ? 'ครับ' : gender === 'female' ? 'ค่ะ' : '';
 
     setAiCallSelf(aiCall);
