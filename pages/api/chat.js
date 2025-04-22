@@ -3,13 +3,13 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { messages } = req.body;
-  const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
   console.log('✅ API KEY:', OPENROUTER_API_KEY);
   console.log('✅ ส่งข้อความไป:', JSON.stringify(messages, null, 2));
 
   if (!OPENROUTER_API_KEY) {
-    console.error('❌ ไม่พบ NEXT_PUBLIC_OPENROUTER_API_KEY ในระบบ');
+    console.error('❌ ไม่พบ OPENROUTER_API_KEY ในระบบ');
     return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY' });
   }
 
