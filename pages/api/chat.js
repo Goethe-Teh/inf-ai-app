@@ -5,6 +5,10 @@ export default async function handler(req, res) {
   const { messages } = req.body;
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
+  if (!OPENROUTER_API_KEY) {
+    return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY' });
+  }
+
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -23,6 +27,10 @@ export default async function handler(req, res) {
         ],
       }),
     });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
 
     const data = await response.json();
     const replyContent = data.choices?.[0]?.message?.content || '';
