@@ -1,11 +1,17 @@
-// force rebuild: 20250421-language-v1
-import React from 'react';
+// force rebuild: 20250421-language-v2
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
 
 export default function LanguagePage() {
   const router = useRouter();
   const [language, setLanguage] = useState('');
+
+  useEffect(() => {
+    const setup = localStorage.getItem('infinity_setup');
+    if (setup) {
+      router.push('/chat');
+    }
+  }, []);
 
   const handleStart = () => {
     if (!language) {
@@ -46,13 +52,18 @@ export default function LanguagePage() {
         style={{ width: '100%', padding: 10, marginTop: 10 }}
       >
         <option value="">-- Select Language --</option>
-        {languages.sort((a, b) => a.label.localeCompare(b.label)).map((lang) => (
-          <option key={lang.code} value={lang.code}>
-            {lang.label}
-          </option>
-        ))}
+        {languages
+          .sort((a, b) => a.label.localeCompare(b.label))
+          .map((lang) => (
+            <option key={lang.code} value={lang.code}>
+              {lang.label}
+            </option>
+          ))}
       </select>
-      <button onClick={handleStart} style={{ width: '100%', padding: 10, marginTop: 20 }}>
+      <button
+        onClick={handleStart}
+        style={{ width: '100%', padding: 10, marginTop: 20 }}
+      >
         Enter
       </button>
     </div>
